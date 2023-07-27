@@ -24,10 +24,13 @@ class GetSet(Dataset):
         return len(self.data)
 
 
-train_data_set = GetSet("..\\data\\source_data.pt", "..\\data\\source_label.pt")
-test_data_set = GetSet("..\\data\\source_data_test.pt", "..\\data\\source_label_test.pt")
+# train_data_set = GetSet("..\\data\\source_data.pt", "..\\data\\source_label.pt")
+# test_data_set = GetSet("..\\data\\source_data_test.pt", "..\\data\\source_label_test.pt")
+# noise data
+train_data_set = GetSet("TheVariant\\source_data_noise.pt", "TheVariant\\source_label_noise.pt")
+test_data_set = GetSet("TheVariant\\test_data_noise.pt", "TheVariant\\test_label_noise.pt")
 train_data = DataLoader(train_data_set, batch_size=50, shuffle=True)
-test_data = DataLoader(test_data_set, batch_size=50, shuffle=False)
+test_data = DataLoader(test_data_set, batch_size=10, shuffle=False)
 
 
 # 2. create module
@@ -62,7 +65,7 @@ criterion = nn.MSELoss()
 optimizer = opt.LBFGS(model.parameters(), lr=0.8)
 model.zero_grad()  # zero model grad
 # train step
-MaxEpoch = 11
+MaxEpoch = 5
 loss_record = []
 for epoch in range(MaxEpoch):
     print(f'step:{epoch}')
@@ -106,11 +109,11 @@ for epoch in range(MaxEpoch):
             plt.plot(np.arange(data_test.size(1)), torch.squeeze(data_test[0, :], dim=0), 'r', linewidth=2.0)
             plt.plot(np.arange(data_test.size(1), data_test.size(1) + future), np.squeeze(y_pred[0, :]),
                      'r:', linewidth=2.0)
-            plt.plot(np.arange(data_test.size(1)), torch.squeeze(data_test[10, :], dim=0), 'g', linewidth=2.0)
-            plt.plot(np.arange(data_test.size(1), data_test.size(1) + future), np.squeeze(y_pred[10, :]),
+            plt.plot(np.arange(data_test.size(1)), torch.squeeze(data_test[9, :], dim=0), 'g', linewidth=2.0)
+            plt.plot(np.arange(data_test.size(1), data_test.size(1) + future), np.squeeze(y_pred[9, :]),
                      'g:', linewidth=2.0)
-            plt.plot(np.arange(data_test.size(1)), torch.squeeze(data_test[30, :], dim=0), 'b', linewidth=2.0)
-            plt.plot(np.arange(data_test.size(1), data_test.size(1) + future), np.squeeze(y_pred[30, :]),
+            plt.plot(np.arange(data_test.size(1)), torch.squeeze(data_test[5, :], dim=0), 'b', linewidth=2.0)
+            plt.plot(np.arange(data_test.size(1), data_test.size(1) + future), np.squeeze(y_pred[5, :]),
                      'b:', linewidth=2.0)
             plt.savefig("RewritePredictLSTM%d.pdf" % epoch)
 
@@ -120,5 +123,7 @@ plt.figure(figsize=(30, 15))
 plt.title('train process with loss', fontsize=30)
 plt.xlabel('step', fontsize=20)
 plt.ylabel('loss', fontsize=20)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
 plt.plot(np.arange(len(loss_record)), loss_record, 'r', linewidth=2)
 plt.savefig('TrainLoss.pdf')

@@ -71,6 +71,7 @@ class model(nn.Module):
 
     def forward(self, input, future=0):
         outputs = []
+        output = 0.0
         if torch.cuda.is_available():
             h_t = torch.zeros(input.size(0), 51, dtype=torch.double, device=cuda)
             c_t = torch.zeros(input.size(0), 51, dtype=torch.double, device=cuda)
@@ -108,6 +109,7 @@ train_data = DataLoader(GetSet("..\\data\\source_data.pt", "..\\data\\source_lab
                         batch_size=20, shuffle=True)
 test_data = DataLoader(GetSet("..\\data\\source_data_test.pt", "..\\data\\source_label_test.pt", from_where='file'),
                        batch_size=50, shuffle=True)
+loss_record = []
 for epoch in tqdm(range(epochMax)):
     print(f'step:{epoch}')
 
@@ -121,8 +123,10 @@ for epoch in tqdm(range(epochMax)):
             loss = criterion(outputs.cuda(cuda), train_label.cuda(cuda))
             loss.backward()
             torch.nn.utils.clip_grad_norm_(seq.parameters(), max_norm=10, norm_type=2) # 梯度裁剪，防止梯度爆炸
+
             running_loss += loss.cpu().item()
         print(f'loss: {running_loss}')
+        loss_record.append(running_loss)
         return running_loss
 
 
@@ -155,3 +159,10 @@ for epoch in tqdm(range(epochMax)):
                      'b:', linewidth=2.0)
             plt.savefig("RewritePredict%d.pdf" % epoch)
     print(f'test loss:{test_running_loss}')
+
+plt.figure(figsize=(20, 20))
+plt.title('The train step with loss', fontsize=20)
+plt.xlabel('step', fontsize=10)
+plt.ylabel('loss', fontsize=10)
+plt.plot(np.arange(len(loss_record)), loss_record, 'k-', linewidth=2.0)
+plt.savefig("Loss.pdf")
